@@ -1,0 +1,118 @@
+import json, time
+file='hotel.json'
+bookings=[]
+
+def welcome():
+ print("="*40)
+ print("🏨  WELCOME TO HOTEL BOOKING SYSTEM  🏨")
+ print("="*40)
+ for c in "Loading": print(c, end='', flush=True); time.sleep(0.1)
+ print("...\n")
+
+def load():
+ try: globals()['bookings']=json.load(open(file))
+ except: bookings=[]
+
+def save(): json.dump(bookings,open(file,'w'))
+
+def menu():
+ print("\n1.Add 2.View 3.Search 4.Update 5.Delete")
+ print("6.Stats 7.Count 8.Clear 9.Help 10.Sort 0.Exit")
+
+def add():
+ try:
+  i=input("ID: ");n=input("Name: ");r=int(input("Room: "))
+  nights=int(input("Nights: "));c=float(input("Cost/Night: "))
+  bookings.append({'id':i,'name':n,'room':r,'nights':nights,'cost':c})
+  save();print("Added")
+ except: print("Error: Invalid input")
+
+def view():
+ if bookings:
+  for b in bookings:
+   print(f"ID:{b['id']} | Name:{b['name']} | Room:{b['room']} | Nights:{b['nights']} | Cost:{b['cost']}")
+ else:
+  print("No bookings available")
+
+def search():
+ k=input("Enter ID or Name: ")
+ found=[b for b in bookings if b['id']==k or b['name'].lower()==k.lower()]
+ print(found[0] if found else "Not found")
+
+def update():
+ k=input("ID to update: ")
+ for b in bookings:
+  if b['id']==k:
+   try:
+    b.update({'name':input("New Name: "),'room':int(input("Room: ")), 
+              'nights':int(input("Nights: ")),'cost':float(input("Cost: "))})
+    save();print("Updated")
+   except: print("Invalid input")
+   return
+ print("Not found")
+
+def delete():
+ k=input("ID to delete: ")
+ for b in bookings:
+  if b['id']==k:
+   bookings.remove(b);save();print("Deleted");return
+ print("Not found")
+
+def stats():
+ if bookings:
+  total=sum(b['cost']*b['nights'] for b in bookings)
+  avg=sum(b['nights'] for b in bookings)/len(bookings)
+  print("Revenue:",total,"| Avg Nights:",round(avg,1))
+ else: print("No data")
+
+def count(i=0):
+ """Recursive count of total bookings"""
+ return 0 if i>=len(bookings) else 1+count(i+1)
+
+def clear():
+ if input("Clear all? y/n: ")=='y': bookings.clear();save();print("Cleared")
+
+def help():
+ print("""
+1. Add: Enter a new booking.
+2. View: Display all bookings.
+3. Search: Find a booking by ID or name.
+4. Update: Change booking info by ID.
+5. Delete: Remove a booking by ID.
+6. Stats: Show total revenue and average nights.
+7. Count: Show total number of bookings (recursive).
+8. Clear: Delete all bookings (with confirmation).
+9. Help: Show instructions.
+10. Sort: Sort bookings by ID, name, or room.
+0. Exit: Quit the program.
+""")
+
+def sort_bookings():
+ key = input("Sort by (id/name/room): ").lower()
+ if key in ['id','name','room']:
+  try:
+   sorted_b = sorted(bookings, key=lambda x: x[key])
+   for b in sorted_b:
+    print(f"ID:{b['id']} | Name:{b['name']} | Room:{b['room']} | Nights:{b['nights']} | Cost:{b['cost']}")
+  except: print("Error sorting")
+ else:
+  print("Invalid sort key")
+
+def main():
+ welcome(); load()
+ while True:
+  menu(); opt=input("> ")
+  if opt=='1': add()
+  elif opt=='2': view()
+  elif opt=='3': search()
+  elif opt=='4': update()
+  elif opt=='5': delete()
+  elif opt=='6': stats()
+  elif opt=='7': print("Total bookings:",count())
+  elif opt=='8': clear()
+  elif opt=='9': help()
+  elif opt=='10': sort_bookings()
+  elif opt=='0': break
+  else: print("Invalid option")
+
+main()
